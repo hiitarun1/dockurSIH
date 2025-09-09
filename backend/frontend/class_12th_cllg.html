@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Class 12 Career Guidance</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #f8ffae, #43c6ac);
+      color: #333;
+    }
+
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .field {
+      margin: 15px 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(to right, #43c6ac, #2c3e50);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #2c3e50, #43c6ac);
+    }
+
+    #result {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+      padding: 12px;
+      background: #eafaf1;
+      border-radius: 10px;
+      display: none;
+    }
+
+    #courses {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f1f8e9;
+      border-radius: 12px;
+      display: none;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #2c3e50;
+      color: white;
+      margin-top: 30px;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>Class 12 Career Guidance</header>
+  <div class="container">
+    <h2>Get College & Course Recommendations</h2>
+    <form id="class12Form">
+      <div class="field">
+        <label>Physics Marks (out of 100)</label>
+        <input type="number" id="phy" min="0" max="100" required>
+      </div>
+
+      <div class="field">
+        <label>Chemistry Marks (out of 100)</label>
+        <input type="number" id="chem" min="0" max="100" required>
+      </div>
+
+      <div class="field">
+        <label>Maths Marks (out of 100)</label>
+        <input type="number" id="math" min="0" max="100" required>
+      </div>
+
+      <div class="field">
+        <label>Biology Marks (out of 100)</label>
+        <input type="number" id="bio" min="0" max="100" required>
+      </div>
+
+      <div class="field">
+        <label>Entrance Exam</label>
+        <select id="exam">
+          <option value="JEE">JEE</option>
+          <option value="NEET">NEET</option>
+          <option value="CUET">CUET</option>
+          <option value="Others">Others</option>
+        </select>
+      </div>
+
+      <button type="button" onclick="recommendColleges()">Get Recommendations</button>
+    </form>
+
+    <h3 id="result"></h3>
+    <div id="courses"></div>
+    <div id="map"></div>
+  </div>
+
+  <footer>© 2025 Career Guidance | Class 12 Students</footer>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const colleges = [
+      { name: "IIT Jammu", exam: "JEE", minMarks: 250, lat: 32.7266, lon: 74.8570 },
+      { name: "AIIMS Jammu", exam: "NEET", minMarks: 300, lat: 32.7333, lon: 74.8500 },
+      { name: "University of Jammu", exam: "CUET", minMarks: 200, lat: 32.7315, lon: 74.8642 },
+      { name: "Govt Medical College, Srinagar", exam: "NEET", minMarks: 280, lat: 34.0837, lon: 74.7973 },
+      { name: "NIT Srinagar", exam: "JEE", minMarks: 220, lat: 34.1258, lon: 74.8373 }
+    ];
+
+    function recommendCourses(total, exam) {
+      let rec = "";
+
+      if (exam === "JEE") {
+        if (total >= 250) rec = "B.Tech (CSE, ECE, Mechanical) at IIT/NIT";
+        else if (total >= 200) rec = "B.Tech at NIT/State Engineering Colleges";
+        else rec = "B.Sc. (Maths/Physics) or Diploma in Engineering";
+      }
+
+      else if (exam === "NEET") {
+        if (total >= 300) rec = "MBBS or BDS at Govt Medical Colleges";
+        else if (total >= 250) rec = "BAMS, BHMS, BPT, Nursing";
+        else rec = "B.Sc. Biology/Zoology or Paramedical Courses";
+      }
+
+      else if (exam === "CUET") {
+        if (total >= 250) rec = "BA (Hons), B.Com (Hons), B.Sc. (Hons)";
+        else if (total >= 200) rec = "BA, B.Com, B.Sc. (General)";
+        else rec = "Diploma / Skill-Based Courses";
+      }
+
+      else {
+        rec = "Explore general courses: BCA, Hotel Management, Design, Arts";
+      }
+
+      document.getElementById("courses").innerHTML =
+        `<h3>📘 Recommended Courses:</h3><p>${rec}</p>`;
+      document.getElementById("courses").style.display = "block";
+    }
+
+    function recommendColleges() {
+      let phy = parseInt(document.getElementById("phy").value) || 0;
+      let chem = parseInt(document.getElementById("chem").value) || 0;
+      let math = parseInt(document.getElementById("math").value) || 0;
+      let bio = parseInt(document.getElementById("bio").value) || 0;
+      let exam = document.getElementById("exam").value;
+
+      let totalMarks = phy + chem + math + bio;
+
+      document.getElementById("result").innerText =
+        "✨ Based on your marks (" + totalMarks + "/400) and exam: " + exam + ", here are some options:";
+      document.getElementById("result").style.display = "block";
+
+      recommendCourses(totalMarks, exam);
+      showMap(totalMarks, exam);
+    }
+
+    function showMap(total, exam) {
+      document.getElementById("map").style.display = "block";
+      var map = L.map('map').setView([33.7782, 76.5762], 7);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18
+      }).addTo(map);
+
+      colleges
+        .filter(c => c.exam === exam && total >= c.minMarks)
+        .forEach(c => {
+          L.marker([c.lat, c.lon]).addTo(map)
+            .bindPopup(`<b>${c.name}</b><br>Exam: ${c.exam}<br>Required Marks: ${c.minMarks}`);
+        });
+    }
+  </script>
+</body>
+</html>
