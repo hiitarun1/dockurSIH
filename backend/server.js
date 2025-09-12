@@ -63,8 +63,8 @@ app.get("/class10th", (req, res) => {
 });
 
 // Example Class 12 page
-app.get("/class12th", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "class12th.html"));
+app.get("/12-Science-Homepage", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend", "12-Science-Homepage.html"));
 });
 
 
